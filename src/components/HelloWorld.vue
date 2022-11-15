@@ -1,42 +1,127 @@
 <template>
   <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
+      <p> {{store.state.name}} </p>
+      <child-com
+          ref="child"
+          :list="list"
+          msg="从父组件传递过来的"
+          @changeListData="changeListData"
+      />
+      <div @click="upClick">{{num1}}</div>
+      <div ref="box">通过ref获取DOM</div>
+      <div>
+          <p>
+              name:{{data.name}}
+          </p>
+          <p>
+              age:{{data.age}}
+          </p>
+          <p>
+              pageNo:{{data.pageNo}}
+          </p>
+        <br>
+          <p>{{dataA.age}}</p>
+          <p @click="changeDataA">改变dataA</p>
+          <p @click="changeData">改变data</p>
+          <p> {{add}}  </p>
+          <p @click="changeList">改变list</p>
+          <p @click="changeChildVal">改变子组件的val</p>
+          <p>{{newNum}}</p>
+      </div>
   </div>
 </template>
 
-<script>
-export default {
-  name: 'HelloWorld',
-  props: {
-    msg: String
-  }
+<script setup>
+import { useStore } from 'vuex' // 引入useStore 方法
+import childCom from './childCom.vue'
+import { watch, ref,onMounted, onUnmounted, reactive,computed,watchEffect } from 'vue';
+const store = useStore()  // 该方法用于返回store 实例
+let box = ref()
+let num1 = ref(10)
+let num2 = ref(5)
+let list = reactive([
+    1,2,3,4
+])
+
+let arr = ["aa","bb"]
+let reaArr = reactive(arr)
+
+let dataA = reactive({
+  age:100
+})
+
+
+
+let data = reactive({
+  name:"",
+  age:"10",
+  pageSize:10,
+  pageNo:1
+})
+
+const changeListData = (val)=>{
+    console.log(val,'----')
 }
+let child = ref()
+const changeDataA = ()=>{
+    child.value.changeNum()
+    dataA.age = 500
+}
+
+
+const changeChildVal = ()=>{
+  child.value.changeVal()
+}
+
+watch(
+  data,
+  (newVal,oldVal)=>{
+      console.log(newVal,oldVal)
+  }
+)
+
+
+watch(dataA,(newVal,oldval)=>{
+    console.log(newVal,oldval,'===')
+})
+
+watchEffect(()=>{
+    console.log(data,dataA,'===')
+})
+
+const newNum = computed(()=>{
+    console.log('==11')
+    return num1.value *2
+})
+
+const changeList = ()=>{
+    data.age = 100
+    list[0] = num1.value++
+}
+
+const add = computed(()=>{
+    return num1.value * num2.value
+})
+
+const changeData = ()=>{
+    data.name = 'hello'
+}
+
+
+onMounted(()=>{
+  console.log("我被创建了")
+  console.log( box.value )
+})
+
+const upClick = ()=>{
+    num1.value++
+}
+
+onUnmounted(()=>{
+  console.log("我被销毁啦")
+})
+
+
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
